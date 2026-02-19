@@ -1,5 +1,6 @@
 package com.example.lab2
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,11 +24,16 @@ data class Stock(
     val symbol: String,
     val name: String,
     val price: String,
-    val change: String
+    val change: String,
+    val currentPrice: Double = 0.0,
+    val quantity: Int = 0
 )
 
+
 @Composable
-fun StockListFragment() {
+fun StockListFragment(
+    onStockClick: (Stock) -> Unit = {}
+) {
     val stocks = listOf(
         Stock("SBER", "Сбербанк", "283.50 ₽", "+1.2%"),
         Stock("GAZP", "Газпром", "198.30 ₽", "-0.5%"),
@@ -55,7 +62,10 @@ fun StockListFragment() {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(stocks) { stock ->
-                    StockItem(stock)
+                    StockItem(
+                        stock = stock,
+                        onClick = { onStockClick(stock) }
+                    )
                 }
             }
         }
@@ -63,11 +73,15 @@ fun StockListFragment() {
 }
 
 @Composable
-fun StockItem(stock: Stock) {
+fun StockItem(
+    stock: Stock,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
+            .clickable { onClick() }
     ) {
         Row(
             modifier = Modifier
@@ -98,11 +112,11 @@ fun StockItem(stock: Stock) {
                     text = stock.change,
                     fontSize = 14.sp,
                     color = if (stock.change.startsWith("+"))
-                        androidx.compose.ui.graphics.Color.Green
+                        Color.Green
                     else if (stock.change.startsWith("-"))
-                        androidx.compose.ui.graphics.Color.Red
+                        Color.Red
                     else
-                        androidx.compose.ui.graphics.Color.Gray
+                        Color.Gray
                 )
             }
         }
