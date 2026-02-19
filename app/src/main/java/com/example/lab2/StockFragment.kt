@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -145,15 +147,14 @@ fun StockChartFragment(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(8.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                                .padding(2.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             TimePeriod.values().forEach { period ->
                                 Button(
                                     onClick = { selectedPeriod = period },
                                     modifier = Modifier
-                                        .weight(1f)
-                                        .padding(horizontal = 2.dp)
+                                        .wrapContentWidth()
                                 ) {
                                     Text(getPeriodName(period))
                                 }
