@@ -49,7 +49,7 @@ fun MainScreen() {
         ) {
             Text(
                 text = "Форма для Регистрации (Activity 1)",
-                fontSize = 24.sp
+                fontSize = 22.sp
             )
 
             Button(
