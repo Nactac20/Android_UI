@@ -1,22 +1,13 @@
 package com.example.lab2
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 data class Stock(
     val symbol: String,
@@ -25,9 +16,9 @@ data class Stock(
     val change: String
 )
 
-@Composable
-fun StockListFragment() {
-    val stocks = listOf(
+class StockListFragment : Fragment(R.layout.fragment_stock_list) {
+
+    private val stocks = listOf(
         Stock("SBER", "Сбербанк", "283.50 ₽", "+1.2%"),
         Stock("GAZP", "Газпром", "198.30 ₽", "-0.5%"),
         Stock("LKOH", "Лукойл", "7,450.00 ₽", "+0.8%"),
@@ -38,79 +29,39 @@ fun StockListFragment() {
         Stock("MGNT", "Магнит", "5,890.00 ₽", "-1.1%")
     )
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            Text(
-                text = "Список акций",
-                fontSize = 24.sp,
-                modifier = Modifier.padding(16.dp)
-            )
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(stocks) { stock ->
-                    StockItem(stock)
-                }
+        val recyclerView: RecyclerView = view.findViewById(R.id.stockRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.adapter = StockAdapter(stocks)
+    }
+
+    private class StockAdapter(
+        private val items: List<Stock>
+    ) : RecyclerView.Adapter<StockAdapter.StockViewHolder>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StockViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(android.R.layout.simple_list_item_2, parent, false)
+            return StockViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: StockViewHolder, position: Int) {
+            holder.bind(items[position])
+        }
+
+        override fun getItemCount(): Int = items.size
+
+        class StockViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            private val text1: TextView = itemView.findViewById(android.R.id.text1)
+            private val text2: TextView = itemView.findViewById(android.R.id.text2)
+
+            fun bind(stock: Stock) {
+                text1.text = "${stock.symbol} - ${stock.name}"
+                text2.text = "${stock.price} (${stock.change})"
             }
         }
     }
 }
 
-@Composable
-fun StockItem(stock: Stock) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = stock.symbol,
-                    fontSize = 18.sp
-                )
-                Text(
-                    text = stock.name,
-                    fontSize = 14.sp
-                )
-            }
-
-            Column(
-                horizontalAlignment = Alignment.End
-            ) {
-                Text(
-                    text = stock.price,
-                    fontSize = 18.sp
-                )
-                Text(
-                    text = stock.change,
-                    fontSize = 14.sp,
-                    color = if (stock.change.startsWith("+"))
-                        androidx.compose.ui.graphics.Color.Green
-                    else if (stock.change.startsWith("-"))
-                        androidx.compose.ui.graphics.Color.Red
-                    else
-                        androidx.compose.ui.graphics.Color.Gray
-                )
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun StockListFragmentPreview() {
-    StockListFragment()
-}
