@@ -2,73 +2,32 @@ package com.example.lab2
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.lab2.ui.theme.Lab2Theme
+import com.example.lab2.R
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            Lab2Theme {
-                MainScreen()
+        setContentView(R.layout.activity_main)
+
+        val loginEditText = findViewById<EditText>(R.id.loginEditText)
+        val passwordEditText = findViewById<EditText>(R.id.passwordEditText)
+        val openProfileButton = findViewById<Button>(R.id.openProfileButton)
+
+        openProfileButton.setOnClickListener {
+            val login = loginEditText.text.toString().trim()
+            val password = passwordEditText.text.toString().trim()
+
+            if (login.isNotEmpty() && password.isNotEmpty()) {
+                val intent = Intent(this, SecondActivity::class.java).apply {
+                    putExtra("username", login)
+                }
+                startActivity(intent)
+            } else {
+                // Можно добавить Toast/ошибку, пока просто не пускаем дальше
             }
         }
-    }
-}
-
-@PreviewScreenSizes
-@Composable
-fun MainScreen() {
-    val context = LocalContext.current
-
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Форма для Регистрации (Activity 1)",
-                fontSize = 24.sp
-            )
-
-            Button(
-                onClick = {
-                    val intent = Intent(context, SecondActivity::class.java)
-                    context.startActivity(intent)
-                },
-                modifier = Modifier.padding(top = 16.dp)
-            ) {
-                Text("Перейти к профилю (Activity 2)")
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MainScreenPreview() {
-    Lab2Theme {
-        MainScreen()
     }
 }
