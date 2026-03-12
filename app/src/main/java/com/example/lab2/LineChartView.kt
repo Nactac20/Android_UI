@@ -27,19 +27,16 @@ class LineChartView @JvmOverloads constructor(
         val width = width.toFloat()
         val height = height.toFloat()
 
-        // Находим мин/макс цены
         val minPrice = data.minOf { it.low }
         val maxPrice = data.maxOf { it.high }
         val priceRange = maxPrice - minPrice
         if (priceRange.toFloat() == 0f) return
 
-        // Рисуем оси
         paint.color = Color.GRAY
         paint.strokeWidth = 2f
         canvas.drawLine(padding, padding, padding, height - padding, paint)
         canvas.drawLine(padding, height - padding, width - padding, height - padding, paint)
 
-        // Рисуем линию графика
         paint.color = Color.BLUE
         paint.strokeWidth = 3f
         paint.style = Paint.Style.STROKE
@@ -55,7 +52,6 @@ class LineChartView @JvmOverloads constructor(
             canvas.drawLine(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, paint)
         }
 
-        // Рисуем точки
         paint.color = Color.RED
         paint.style = Paint.Style.FILL
         points.forEach { canvas.drawCircle(it.x, it.y, 4f, paint) }

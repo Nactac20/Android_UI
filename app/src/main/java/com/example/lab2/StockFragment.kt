@@ -34,16 +34,18 @@ class StockChartFragment : Fragment() {
         return binding.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Настройка тулбара
         binding.toolbar.title = "${stock.symbol} - ${stock.name}"
         binding.toolbar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-        // Инициализация данных портфеля
+        binding.chartTypeToggle.check(R.id.btnLineChart)
+        binding.periodToggle.check(R.id.btnMonth)
+
         val currentPrice = parsePrice(stock.price)
         val quantity = 10
         val averagePrice = currentPrice * 0.95
@@ -62,7 +64,6 @@ class StockChartFragment : Fragment() {
                 ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark)
         )
 
-        // Переключение типа графика
         binding.btnLineChart.setOnClickListener {
             binding.lineChart.visibility = View.VISIBLE
             binding.candleChart.visibility = View.GONE
@@ -75,18 +76,25 @@ class StockChartFragment : Fragment() {
             updateChartData(ChartType.CANDLE, TimePeriod.MONTH)
         }
 
-        // Переключение периода
         binding.btnWeek.setOnClickListener { updateChartData(ChartType.LINE, TimePeriod.WEEK) }
         binding.btnMonth.setOnClickListener { updateChartData(ChartType.LINE, TimePeriod.MONTH) }
-        binding.btnHalfYear.setOnClickListener { updateChartData(ChartType.LINE, TimePeriod.HALF_YEAR) }
+        binding.btnHalfYear.setOnClickListener {
+            updateChartData(
+                ChartType.LINE,
+                TimePeriod.HALF_YEAR
+            )
+        }
         binding.btnYear.setOnClickListener { updateChartData(ChartType.LINE, TimePeriod.YEAR) }
-        binding.btnAllTime.setOnClickListener { updateChartData(ChartType.LINE, TimePeriod.ALL_TIME) }
+        binding.btnAllTime.setOnClickListener {
+            updateChartData(
+                ChartType.LINE,
+                TimePeriod.ALL_TIME
+            )
+        }
 
-        // Кнопки покупки/продажи
         binding.btnBuy.setOnClickListener { /* TODO: Логика покупки */ }
         binding.btnSell.setOnClickListener { /* TODO: Логика продажи */ }
 
-        // Инициализация графика по умолчанию
         updateChartData(ChartType.LINE, TimePeriod.MONTH)
     }
 
@@ -116,7 +124,6 @@ class StockChartFragment : Fragment() {
     }
 }
 
-// Вспомогательные функции и классы
 fun parsePrice(priceString: String): Double {
     return priceString
         .replace("₽", "")
@@ -137,6 +144,7 @@ data class PricePoint(
     val low: Double = 0.0,
     val close: Double = 0.0
 )
+
 
 fun generateChartData(basePrice: Double, period: TimePeriod): List<PricePoint> {
     val random = Random(System.currentTimeMillis())
@@ -178,4 +186,7 @@ fun generateChartData(basePrice: Double, period: TimePeriod): List<PricePoint> {
     }
 
     return data
+
+
+
 }

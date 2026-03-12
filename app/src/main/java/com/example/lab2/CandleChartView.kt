@@ -29,13 +29,11 @@ class CandleChartView @JvmOverloads constructor(
         val width = width.toFloat()
         val height = height.toFloat()
 
-        // Находим мин/макс цены
         val minPrice = data.minOf { it.low }
         val maxPrice = data.maxOf { it.high }
         val priceRange = maxPrice - minPrice
         if (priceRange.toFloat() == 0f) return
 
-        // Рисуем оси
         paint.color = Color.GRAY
         paint.strokeWidth = 2f
         canvas.drawLine(padding, padding, padding, height - padding, paint)
@@ -54,12 +52,10 @@ class CandleChartView @JvmOverloads constructor(
 
             val color = if (point.close >= point.open) Color.GREEN else Color.RED
 
-            // Фитиль
             paint.color = color
             paint.strokeWidth = 2f
             canvas.drawLine(x, highY, x, lowY, paint)
 
-            // Тело свечи
             val topY = min(openY, closeY)
             val bottomY = max(openY, closeY)
             paint.style = Paint.Style.FILL
