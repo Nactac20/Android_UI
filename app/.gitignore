@@ -1,1 +1,7 @@
+<<<<<<< HEAD
 /build
+/.idea
+/.gradle
+=======
+/build
+>>>>>>> origin/main

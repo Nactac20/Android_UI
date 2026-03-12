@@ -17,7 +17,6 @@ class SecondActivity : AppCompatActivity() {
 
         val usernameFromIntent = intent.getStringExtra("username")
 
-        // По умолчанию показываем профиль
         if (savedInstanceState == null) {
             openProfileFragment(usernameFromIntent)
         }
@@ -57,4 +56,3 @@ class SecondActivity : AppCompatActivity() {
         }
     }
 }
-

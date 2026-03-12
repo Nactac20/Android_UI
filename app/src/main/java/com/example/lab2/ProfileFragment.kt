@@ -10,6 +10,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

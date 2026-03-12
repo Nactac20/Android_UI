@@ -5,18 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.lab2.databinding.FragmentStockListBinding
 
-data class Stock(
-    val symbol: String,
-    val name: String,
-    val price: String,
-    val change: String
-)
+class StockListFragment : Fragment() {
 
-class StockListFragment : Fragment(R.layout.fragment_stock_list) {
+    private var _binding: FragmentStockListBinding? = null
+    private val binding get() = _binding!!
 
     private val stocks = listOf(
         Stock("SBER", "Сбербанк", "283.50 ₽", "+1.2%"),
@@ -29,39 +27,71 @@ class StockListFragment : Fragment(R.layout.fragment_stock_list) {
         Stock("MGNT", "Магнит", "5,890.00 ₽", "-1.1%")
     )
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentStockListBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val recyclerView: RecyclerView = view.findViewById(R.id.stockRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = StockAdapter(stocks)
+        binding.stockRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.stockRecyclerView.adapter = StockAdapter(stocks) { stock ->
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, StockChartFragment.newInstance(stock))
+                .addToBackStack(null)
+                .commit()
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private class StockAdapter(
-        private val items: List<Stock>
+        private val items: List<Stock>,
+        private val onItemClick: (Stock) -> Unit
     ) : RecyclerView.Adapter<StockAdapter.StockViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StockViewHolder {
             val view = LayoutInflater.from(parent.context)
-                .inflate(android.R.layout.simple_list_item_2, parent, false)
+                .inflate(R.layout.item_stock, parent, false)
             return StockViewHolder(view)
         }
 
         override fun onBindViewHolder(holder: StockViewHolder, position: Int) {
-            holder.bind(items[position])
+            holder.bind(items[position], onItemClick)
         }
 
         override fun getItemCount(): Int = items.size
 
         class StockViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            private val text1: TextView = itemView.findViewById(android.R.id.text1)
-            private val text2: TextView = itemView.findViewById(android.R.id.text2)
+            private val symbolTextView: TextView = itemView.findViewById(R.id.symbolTextView)
+            private val nameTextView: TextView = itemView.findViewById(R.id.nameTextView)
+            private val priceTextView: TextView = itemView.findViewById(R.id.priceTextView)
+            private val changeTextView: TextView = itemView.findViewById(R.id.changeTextView)
 
-            fun bind(stock: Stock) {
-                text1.text = "${stock.symbol} - ${stock.name}"
-                text2.text = "${stock.price} (${stock.change})"
+            fun bind(stock: Stock, onItemClick: (Stock) -> Unit) {
+                symbolTextView.text = stock.symbol
+                nameTextView.text = stock.name
+                priceTextView.text = stock.price
+                changeTextView.text = stock.change
+
+                changeTextView.setTextColor(
+                    when {
+                        stock.change.startsWith("+") -> ContextCompat.getColor(itemView.context, android.R.color.holo_green_dark)
+                        stock.change.startsWith("-") -> ContextCompat.getColor(itemView.context, android.R.color.holo_red_dark)
+                        else -> ContextCompat.getColor(itemView.context, android.R.color.darker_gray)
+                    }
+                )
+
+                itemView.setOnClickListener { onItemClick(stock) }
             }
         }
     }
 }
-
