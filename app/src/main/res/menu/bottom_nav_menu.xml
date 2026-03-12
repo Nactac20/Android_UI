@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title="Профиль" />
+
+    <item
+        android:id="@+id/nav_my_stat"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title="Моя статистика" />
+
+    <item
+        android:id="@+id/nav_stock_list"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title="Список акций" />
+
+    <item
+        android:id="@+id/nav_stock_stat"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title="Статистика акций" />
+
+</menu>
+

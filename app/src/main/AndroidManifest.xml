@@ -12,6 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Lab2">
 
+        <!-- Первая Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -23,6 +24,7 @@
             </intent-filter>
         </activity>
 
+        <!-- Вторая Activity с фрагментами -->
         <activity
             android:name=".SecondActivity"
             android:exported="false"
