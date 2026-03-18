@@ -5,27 +5,35 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lab2.databinding.FragmentStockListBinding
+import com.example.lab2.data.StockQuote
+import com.example.lab2.data.StockRepository
+import java.util.Locale
+import kotlinx.coroutines.launch
 
 class StockListFragment : Fragment() {
 
     private var _binding: FragmentStockListBinding? = null
     private val binding get() = _binding!!
 
-    private val stocks = listOf(
-        Stock("SBER", "Сбербанк", "283.50 ₽", "+1.2%"),
-        Stock("GAZP", "Газпром", "198.30 ₽", "-0.5%"),
-        Stock("LKOH", "Лукойл", "7,450.00 ₽", "+0.8%"),
-        Stock("YNDX", "Яндекс", "3,620.00 ₽", "+2.1%"),
-        Stock("ROSN", "Роснефть", "567.80 ₽", "-0.3%"),
-        Stock("VTBR", "ВТБ", "0.0235 ₽", "0.0%"),
-        Stock("NVTK", "НОВАТЭК", "1,234.50 ₽", "+0.4%"),
-        Stock("MGNT", "Магнит", "5,890.00 ₽", "-1.1%")
+    private val symbols = listOf(
+        "SBER",
+        "GAZP",
+        "LKOH",
+        "YNDX",
+        "ROSN",
+        "VTBR",
+        "NVTK",
+        "MGNT"
     )
+
+    private val stockRepository = StockRepository()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,11 +48,28 @@ class StockListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.stockRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.stockRecyclerView.adapter = StockAdapter(stocks) { stock ->
+
+        val adapter = StockAdapter(emptyList()) { stock ->
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragmentContainer, StockChartFragment.newInstance(stock))
                 .addToBackStack(null)
                 .commit()
+        }
+        binding.stockRecyclerView.adapter = adapter
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val quotes = runCatching { stockRepository.fetchQuotes(symbols) }
+                .getOrElse {
+                    Toast.makeText(requireContext(), "Ошибка загрузки курсов", Toast.LENGTH_SHORT)
+                        .show()
+                    emptyList()
+                }
+
+            val newStocks = quotes.map { it.toStock() }
+            if (newStocks.isEmpty()) {
+                Toast.makeText(requireContext(), "Курсы не найдены", Toast.LENGTH_SHORT).show()
+            }
+            adapter.updateItems(newStocks)
         }
     }
 
@@ -53,10 +78,26 @@ class StockListFragment : Fragment() {
         _binding = null
     }
 
+    private fun StockQuote.toStock(): Stock {
+        val priceText = String.format(Locale.US, "%.2f ₽", price)
+        val changeText = String.format(Locale.US, "%+.2f ₽ (%+.2f%%)", changeAbs, changePct)
+        return Stock(
+            symbol = symbol,
+            name = name,
+            price = priceText,
+            change = changeText
+        )
+    }
+
     private class StockAdapter(
-        private val items: List<Stock>,
+        private var items: List<Stock>,
         private val onItemClick: (Stock) -> Unit
     ) : RecyclerView.Adapter<StockAdapter.StockViewHolder>() {
+
+        fun updateItems(newItems: List<Stock>) {
+            items = newItems
+            notifyDataSetChanged()
+        }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StockViewHolder {
             val view = LayoutInflater.from(parent.context)

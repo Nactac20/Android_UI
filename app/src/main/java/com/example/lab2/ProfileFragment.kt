@@ -6,9 +6,27 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.example.lab2.data.StockRepository
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.util.Locale
+import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
+
+    private val symbols = listOf(
+        "SBER",
+        "GAZP",
+        "LKOH",
+        "YNDX",
+        "ROSN",
+        "VTBR",
+        "NVTK",
+        "MGNT"
+    )
+
+    private val stockRepository = StockRepository()
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -38,7 +56,15 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         btnRefreshStats.setOnClickListener {
             refreshStatistics(tvBalance, tvStockCount)
+            updateBottomNavQuotes()
         }
+
+        // Обновляем label в bottom nav при открытии профиля.
+        updateBottomNavQuotes()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
     }
 
     private fun refreshStatistics(tvBalance: TextView, tvStockCount: TextView) {
@@ -49,5 +75,43 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         tvStockCount.text = newCount.toString()
 
         Toast.makeText(requireContext(), "Статистика обновлена", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun updateBottomNavQuotes() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val quotes = runCatching { stockRepository.fetchQuotes(symbols) }
+                .getOrElse { throwable ->
+                    // requireContext() может упасть, если фрагмент уже отсоединен при пересоздании по смене темы.
+                    context?.let {
+                        Toast.makeText(it, "Ошибка загрузки курсов", Toast.LENGTH_SHORT).show()
+                    }
+                    emptyList()
+                }
+
+            val top = quotes.maxByOrNull { it.changePct }
+            if (top == null) return@launch
+
+            // requireActivity() может упасть, если фрагмент уже не attached.
+            val bottomNav: BottomNavigationView =
+                activity?.findViewById(R.id.bottomNavigation) ?: return@launch
+
+            val titleProfile = "Профиль"
+            val titleMyStat = "Моя статистика"
+            val titleStockList = "Список акций"
+            val titleStockStat = "Статистика акций"
+
+            bottomNav.menu.findItem(R.id.nav_profile)?.title = titleProfile
+            bottomNav.menu.findItem(R.id.nav_my_stat)?.title = titleMyStat
+            bottomNav.menu.findItem(R.id.nav_stock_list)?.title = titleStockList
+            bottomNav.menu.findItem(R.id.nav_stock_stat)?.title = titleStockStat
+        }
+    }
+
+    private fun formatRub(value: Double): String {
+        return String.format(Locale.US, "%.2f ₽", value)
+    }
+
+    private fun formatPct(value: Double): String {
+        return String.format(Locale.US, "%+.2f%%", value)
     }
 }
