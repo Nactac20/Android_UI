@@ -22,6 +22,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val tvStockCount = view.findViewById<TextView>(R.id.tvStockCount)
         val tvRegDate = view.findViewById<TextView>(R.id.tvRegDate)
         val switchDarkTheme = view.findViewById<SwitchMaterial>(R.id.switchDarkTheme)
+
+        switchDarkTheme.isChecked = ThemePrefs.isDarkEnabled(requireContext())
+        switchDarkTheme.setOnCheckedChangeListener { _, isChecked ->
+            ThemePrefs.setDarkEnabled(requireContext(), isChecked)
+        }
         val btnRefreshStats = view.findViewById<Button>(R.id.btnRefreshStats)
 
         tvUserName.text = username

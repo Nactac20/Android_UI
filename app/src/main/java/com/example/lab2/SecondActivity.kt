@@ -9,19 +9,30 @@ class SecondActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySecondBinding
 
+    private companion object {
+        const val KEY_SELECTED_NAV = "selected_nav"
+        const val KEY_USERNAME = "username"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ThemePrefs.applySaved(this)
 
         binding = ActivitySecondBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val usernameFromIntent = intent.getStringExtra("username")
+        val username = savedInstanceState?.getString(KEY_USERNAME) ?: intent.getStringExtra("username")
 
-        if (savedInstanceState == null) {
-            openProfileFragment(usernameFromIntent)
-        }
+        setupBottomNavigation(binding.bottomNavigation, username)
 
-        setupBottomNavigation(binding.bottomNavigation)
+        binding.bottomNavigation.selectedItemId =
+            savedInstanceState?.getInt(KEY_SELECTED_NAV, R.id.nav_profile) ?: R.id.nav_profile
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(KEY_SELECTED_NAV, binding.bottomNavigation.selectedItemId)
+        outState.putString(KEY_USERNAME, (intent.getStringExtra("username") ?: ""))
     }
 
     private fun openProfileFragment(username: String?) {
@@ -37,22 +48,34 @@ class SecondActivity : AppCompatActivity() {
             .commit()
     }
 
-    private fun setupBottomNavigation(bottomNav: BottomNavigationView) {
+    private fun setupBottomNavigation(bottomNav: BottomNavigationView, username: String?) {
         bottomNav.setOnItemSelectedListener { item ->
-            val fragment = when (item.itemId) {
-                R.id.nav_profile -> ProfileFragment()
-                R.id.nav_my_stat -> MyStatFragment()
-                R.id.nav_stock_list -> StockListFragment()
-                R.id.nav_stock_stat -> StockStatFragment()
-                else -> null
+            when (item.itemId) {
+                R.id.nav_profile -> {
+                    openProfileFragment(username)
+                    true
+                }
+                R.id.nav_my_stat -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, MyStatFragment())
+                        .commit()
+                    true
+                }
+                R.id.nav_stock_list -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, StockListFragment())
+                        .commit()
+                    true
+                }
+                R.id.nav_stock_stat -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, StockStatFragment())
+                        .commit()
+                    true
+                }
+                else -> false
             }
-
-            fragment?.let {
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragmentContainer, it)
-                    .commit()
-                true
-            } ?: false
         }
     }
+
 }

@@ -6,9 +6,11 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.activity.ComponentActivity
 
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ThemePrefs.applySaved(this)
         setContentView(R.layout.activity_main)
 
         val loginEditText = findViewById<EditText>(R.id.loginEditText)

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="?attr/colorSurface">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
             android:layout_marginTop="16dp"
             app:cardCornerRadius="50dp"
             app:cardElevation="4dp"
-            app:cardBackgroundColor="#E1E1E1">
+            app:cardBackgroundColor="?attr/colorSurface">
 
             <TextView
                 android:layout_width="match_parent"
@@ -30,21 +30,27 @@
 
         <TextView
             android:id="@+id/tvUserName"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:text="Иван Петров"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="#212121" />
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="?attr/colorOnSurface" />
 
         <TextView
             android:id="@+id/tvUserEmail"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="ivan@example.com"
             android:textSize="14sp"
-            android:textColor="#757575" />
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="?attr/colorOnSurface" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -65,7 +71,7 @@
                     android:text="Финансовая информация"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="#212121"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <LinearLayout
@@ -79,7 +85,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Баланс:"
-                        android:textColor="#757575" />
+                        android:textColor="?attr/colorOnSurface" />
 
                     <TextView
                         android:id="@+id/tvBalance"
@@ -93,7 +99,7 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#E0E0E0"
+                    android:background="?attr/colorOnSurface"
                     android:layout_marginBottom="12dp" />
 
                 <LinearLayout
@@ -107,7 +113,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Акций в портфеле:"
-                        android:textColor="#757575" />
+                        android:textColor="?attr/colorOnSurface" />
 
                     <TextView
                         android:id="@+id/tvStockCount"
@@ -115,13 +121,13 @@
                         android:layout_height="wrap_content"
                         android:text="5"
                         android:textStyle="bold"
-                        android:textColor="#212121" />
+                        android:textColor="?attr/colorOnSurface" />
                 </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#E0E0E0"
+                    android:background="?attr/colorOnSurface"
                     android:layout_marginBottom="12dp" />
 
                 <LinearLayout
@@ -134,14 +140,14 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Дата регистрации:"
-                        android:textColor="#757575" />
+                        android:textColor="?attr/colorOnSurface" />
 
                     <TextView
                         android:id="@+id/tvRegDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="01.01.2024"
-                        android:textColor="#212121" />
+                        android:textColor="?attr/colorOnSurface" />
                 </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -165,7 +171,7 @@
                     android:text="Настройки"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="#212121"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <LinearLayout
@@ -180,7 +186,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Тёмная тема"
-                        android:textColor="#757575" />
+                        android:textColor="?attr/colorOnSurface" />
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switchDarkTheme"
@@ -199,7 +205,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:text="Обновить статистику"
-            android:backgroundTint="#03A9F4" />
+            android:backgroundTint="?attr/colorPrimary" />
 
     </LinearLayout>
 </ScrollView>
