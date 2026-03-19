@@ -96,14 +96,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 activity?.findViewById(R.id.bottomNavigation) ?: return@launch
 
             val titleProfile = "Профиль"
-            val titleMyStat = "Моя статистика"
-            val titleStockList = "Список акций"
-            val titleStockStat = "Статистика акций"
+            val titleMyStat = "Статистика"
+            val titleStockList = "Акции"
 
             bottomNav.menu.findItem(R.id.nav_profile)?.title = titleProfile
-            bottomNav.menu.findItem(R.id.nav_my_stat)?.title = titleMyStat
+            bottomNav.menu.findItem(R.id.nav_statistics)?.title = titleMyStat
             bottomNav.menu.findItem(R.id.nav_stock_list)?.title = titleStockList
-            bottomNav.menu.findItem(R.id.nav_stock_stat)?.title = titleStockStat
         }
     }
 

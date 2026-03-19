@@ -55,21 +55,15 @@ class SecondActivity : AppCompatActivity() {
                     openProfileFragment(username)
                     true
                 }
-                R.id.nav_my_stat -> {
+                R.id.nav_statistics -> {
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainer, MyStatFragment())
+                        .replace(R.id.fragmentContainer, StatisticsFragment())
                         .commit()
                     true
                 }
                 R.id.nav_stock_list -> {
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.fragmentContainer, StockListFragment())
-                        .commit()
-                    true
-                }
-                R.id.nav_stock_stat -> {
-                    supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainer, StockStatFragment())
                         .commit()
                     true
                 }
