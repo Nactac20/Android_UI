@@ -2,58 +2,76 @@ package com.example.lab2.data
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Path
 
 class MoexStockApi(
     private val baseUrl: String = "https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities/"
 ) {
+    private val service: MoexService
+
+    init {
+        val retrofit = Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        service = retrofit.create(MoexService::class.java)
+    }
+
+    interface MoexService {
+        @GET("{symbol}.json")
+        suspend fun getQuote(@Path("symbol") symbol: String): MoexResponse
+    }
+
+    data class MoexResponse(
+        val securities: MoexSection,
+        val marketdata: MoexSection
+    )
+
+    data class MoexSection(
+        val columns: List<String>,
+        val data: List<List<Any?>>
+    )
 
     suspend fun fetchQuote(symbol: String): StockQuote = withContext(Dispatchers.IO) {
-        val url = URL("${baseUrl}${symbol}.json")
-        val connection = (url.openConnection() as HttpURLConnection).apply {
-            requestMethod = "GET"
-            connectTimeout = 8000
-            readTimeout = 8000
-            setRequestProperty("Accept", "application/json")
+        try {
+            val response = service.getQuote(symbol)
+            parseResponse(response, symbol)
+        } catch (e: Exception) {
+            // тут можно сделать нормальную ошибку
+            throw e
         }
+    }
 
-        val responseText: String = connection.inputStream.bufferedReader().use { it.readText() }
-        connection.disconnect()
-
-        val root = JSONObject(responseText)
-
-        val securitiesObj = root.getJSONObject("securities")
-        val marketDataObj = root.getJSONObject("marketdata")
-
-        val secColumns = securitiesObj.getJSONArray("columns")
-        val secData = securitiesObj.getJSONArray("data")
+    private fun parseResponse(root: MoexResponse, symbol: String): StockQuote {
+        val secColumns = root.securities.columns
+        val secData = root.securities.data
         val secIdx = columnsToIndex(secColumns)
 
-        val boardIdIdxSec = secIdx["BOARDID"] ?: return@withContext StockQuote(symbol, symbol, 0.0, 0.0, 0.0)
-        val shortNameIdx = secIdx["SHORTNAME"] ?: return@withContext StockQuote(symbol, symbol, 0.0, 0.0, 0.0)
-        val prevPriceIdx = secIdx["PREVPRICE"] ?: return@withContext StockQuote(symbol, symbol, 0.0, 0.0, 0.0)
+        val boardIdIdxSec = secIdx["BOARDID"] ?: return StockQuote(symbol, symbol, 0.0, 0.0, 0.0)
+        val shortNameIdx = secIdx["SHORTNAME"] ?: return StockQuote(symbol, symbol, 0.0, 0.0, 0.0)
+        val prevPriceIdx = secIdx["PREVPRICE"] ?: return StockQuote(symbol, symbol, 0.0, 0.0, 0.0)
 
         val prevRow = findRowWithBoardAndPrevPrice(secData, boardIdIdxSec, prevPriceIdx)
         val prevPrice = prevRow?.let { safeGetDoubleOrNull(it, prevPriceIdx) } ?: 0.0
         val name = prevRow?.let { safeGetString(it, shortNameIdx) } ?: symbol
 
-        val lastColumns = marketDataObj.getJSONArray("columns")
-        val lastData = marketDataObj.getJSONArray("data")
+        val lastColumns = root.marketdata.columns
+        val lastData = root.marketdata.data
         val mdIdx = columnsToIndex(lastColumns)
 
         val boardIdIdxMd = mdIdx["BOARDID"]
         val lastIdx = mdIdx["LAST"]
         if (boardIdIdxMd == null || lastIdx == null) {
-            return@withContext StockQuote(symbol, name, 0.0, 0.0, 0.0)
+            return StockQuote(symbol, name, 0.0, 0.0, 0.0)
         }
 
         val lastRow = findRowWithBoardId(lastData, boardIdIdxMd, "TQBR")
         val lastPrice = lastRow?.let { safeGetDoubleOrNull(it, lastIdx) } ?: 0.0
 
-        // LASTCHANGE and LASTCHANGEPRCNT can be null depending on the trading state.
         val lastChangeIdx = mdIdx["LASTCHANGE"]
         val lastChangePctIdx = mdIdx["LASTCHANGEPRCNT"]
 
@@ -75,7 +93,7 @@ class MoexStockApi(
             else -> 0.0
         }
 
-        StockQuote(
+        return StockQuote(
             symbol = symbol,
             name = name,
             price = lastPrice,
@@ -84,53 +102,64 @@ class MoexStockApi(
         )
     }
 
-    private fun columnsToIndex(columns: JSONArray): Map<String, Int> {
-        val result = HashMap<String, Int>(columns.length())
-        for (i in 0 until columns.length()) {
-            result[columns.getString(i)] = i
+    private fun columnsToIndex(columns: List<String>): Map<String, Int> {
+        val result = HashMap<String, Int>(columns.size)
+        for (i in columns.indices) {
+            result[columns[i]] = i
         }
         return result
     }
 
     private fun findRowWithBoardAndPrevPrice(
-        rows: JSONArray,
+        rows: List<List<Any?>>,
         boardIdIdx: Int,
         prevPriceIdx: Int
-    ): JSONArray? {
-        for (i in 0 until rows.length()) {
-            val row = rows.getJSONArray(i)
+    ): List<Any?>? {
+        for (row in rows) {
             val boardId = safeGetStringOrNull(row, boardIdIdx)
-            if (boardId == "TQBR" && !row.isNull(prevPriceIdx)) {
+            if (boardId == "TQBR" && !isNull(row, prevPriceIdx)) {
                 return row
             }
         }
         // Fallback: first row with a non-null PREVPRICE.
-        for (i in 0 until rows.length()) {
-            val row = rows.getJSONArray(i)
-            if (!row.isNull(prevPriceIdx)) return row
+        for (row in rows) {
+            if (!isNull(row, prevPriceIdx)) return row
         }
         return null
     }
 
-    private fun findRowWithBoardId(rows: JSONArray, boardIdIdx: Int, boardId: String): JSONArray? {
-        for (i in 0 until rows.length()) {
-            val row = rows.getJSONArray(i)
+    private fun findRowWithBoardId(rows: List<List<Any?>>, boardIdIdx: Int, boardId: String): List<Any?>? {
+        for (row in rows) {
             val bid = safeGetStringOrNull(row, boardIdIdx)
             if (bid == boardId) return row
         }
         return null
     }
 
-    private fun safeGetDoubleOrNull(row: JSONArray, idx: Int): Double? {
-        return if (row.isNull(idx)) null else row.getDouble(idx)
+    private fun safeGetDoubleOrNull(row: List<Any?>, idx: Int): Double? {
+        if (idx < 0 || idx >= row.size) return null
+        val value = row[idx] ?: return null
+        return when (value) {
+            is Number -> value.toDouble()
+            is String -> value.toDoubleOrNull()
+            else -> null
+        }
     }
 
-    private fun safeGetString(row: JSONArray, idx: Int): String {
-        return if (row.isNull(idx)) "" else row.getString(idx)
+    private fun safeGetString(row: List<Any?>, idx: Int): String {
+        if (idx < 0 || idx >= row.size) return ""
+        val value = row[idx] ?: return ""
+        return value.toString()
     }
 
-    private fun safeGetStringOrNull(row: JSONArray, idx: Int): String? {
-        return if (row.isNull(idx)) null else row.getString(idx)
+    private fun safeGetStringOrNull(row: List<Any?>, idx: Int): String? {
+        if (idx < 0 || idx >= row.size) return null
+        val value = row[idx] ?: return null
+        return value.toString()
+    }
+
+    private fun isNull(row: List<Any?>, idx: Int): Boolean {
+        if (idx < 0 || idx >= row.size) return true
+        return row[idx] == null
     }
 }
-
