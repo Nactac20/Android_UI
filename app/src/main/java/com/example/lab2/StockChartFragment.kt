@@ -17,6 +17,9 @@ class StockChartFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var stock: Stock
 
+    private var currentChartType = ChartType.LINE
+    private var currentTimePeriod = TimePeriod.MONTH
+
     companion object {
         fun newInstance(stock: Stock): StockChartFragment {
             val fragment = StockChartFragment()
@@ -65,37 +68,44 @@ class StockChartFragment : Fragment() {
         )
 
         binding.btnLineChart.setOnClickListener {
+            currentChartType = ChartType.LINE
             binding.lineChart.visibility = View.VISIBLE
             binding.candleChart.visibility = View.GONE
-            updateChartData(ChartType.LINE, TimePeriod.MONTH)
+            updateChartData(currentChartType, currentTimePeriod)
         }
 
         binding.btnCandleChart.setOnClickListener {
+            currentChartType = ChartType.CANDLE
             binding.lineChart.visibility = View.GONE
             binding.candleChart.visibility = View.VISIBLE
-            updateChartData(ChartType.CANDLE, TimePeriod.MONTH)
+            updateChartData(currentChartType, currentTimePeriod)
         }
 
-        binding.btnWeek.setOnClickListener { updateChartData(ChartType.LINE, TimePeriod.WEEK) }
-        binding.btnMonth.setOnClickListener { updateChartData(ChartType.LINE, TimePeriod.MONTH) }
-        binding.btnHalfYear.setOnClickListener {
-            updateChartData(
-                ChartType.LINE,
-                TimePeriod.HALF_YEAR
-            )
+        binding.btnWeek.setOnClickListener { 
+            currentTimePeriod = TimePeriod.WEEK
+            updateChartData(currentChartType, currentTimePeriod) 
         }
-        binding.btnYear.setOnClickListener { updateChartData(ChartType.LINE, TimePeriod.YEAR) }
+        binding.btnMonth.setOnClickListener { 
+            currentTimePeriod = TimePeriod.MONTH
+            updateChartData(currentChartType, currentTimePeriod) 
+        }
+        binding.btnHalfYear.setOnClickListener {
+            currentTimePeriod = TimePeriod.HALF_YEAR
+            updateChartData(currentChartType, currentTimePeriod)
+        }
+        binding.btnYear.setOnClickListener { 
+            currentTimePeriod = TimePeriod.YEAR
+            updateChartData(currentChartType, currentTimePeriod) 
+        }
         binding.btnAllTime.setOnClickListener {
-            updateChartData(
-                ChartType.LINE,
-                TimePeriod.ALL_TIME
-            )
+            currentTimePeriod = TimePeriod.ALL_TIME
+            updateChartData(currentChartType, currentTimePeriod)
         }
 
         binding.btnBuy.setOnClickListener { /* TODO: Логика покупки */ }
         binding.btnSell.setOnClickListener { /* TODO: Логика продажи */ }
 
-        updateChartData(ChartType.LINE, TimePeriod.MONTH)
+        updateChartData(currentChartType, currentTimePeriod)
     }
 
     private fun updateChartData(type: ChartType, period: TimePeriod) {

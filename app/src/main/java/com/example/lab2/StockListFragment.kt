@@ -58,15 +58,19 @@ class StockListFragment : Fragment() {
         binding.stockRecyclerView.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
-            val quotes = runCatching { stockRepository.fetchQuotes(symbols) }
-                .getOrElse {
-                    Toast.makeText(requireContext(), "Ошибка загрузки курсов", Toast.LENGTH_SHORT)
-                        .show()
-                    emptyList()
+            val result = runCatching { stockRepository.fetchQuotes(symbols) }
+
+            val quotes = result.getOrElse {
+                context?.let { ctx ->
+                    Toast.makeText(ctx, "Ошибка загрузки курсов", Toast.LENGTH_SHORT).show()
                 }
+                emptyList()
+            }
+
+            if (!isAdded) return@launch
 
             val newStocks = quotes.map { it.toStock() }
-            if (newStocks.isEmpty()) {
+            if (newStocks.isEmpty() && result.isSuccess) {
                 Toast.makeText(requireContext(), "Курсы не найдены", Toast.LENGTH_SHORT).show()
             }
             adapter.updateItems(newStocks)
