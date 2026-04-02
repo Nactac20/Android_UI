@@ -1,0 +1,17 @@
+{
+  "balance": 10000.00,
+  "stocksCount": 5,
+  "totalValue": 12450.00,
+  "unrealizedProfit": 450.00,
+  "positions": [
+    {"symbol": "SBER", "quantity": 3},
+    {"symbol": "GAZP", "quantity": 2},
+    {"symbol": "LKOH", "quantity": 0},
+    {"symbol": "YNDX", "quantity": 0},
+    {"symbol": "ROSN", "quantity": 0}
+  ],
+  "trades": [
+    {"id": "T1", "symbol": "SBER", "type": "buy", "profit": 120.00},
+    {"id": "T2", "symbol": "GAZP", "type": "sell", "profit": -30.00}
+  ]
+}

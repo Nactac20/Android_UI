@@ -6,7 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import com.example.lab2.databinding.FragmentStockChartBinding
+import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -20,6 +23,8 @@ class StockChartFragment : Fragment() {
     private var currentChartType = ChartType.LINE
     private var currentTimePeriod = TimePeriod.MONTH
 
+    private val sharedViewModel: SharedStatsViewModel by activityViewModels()
+
     companion object {
         fun newInstance(stock: Stock): StockChartFragment {
             val fragment = StockChartFragment()
@@ -28,44 +33,26 @@ class StockChartFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentStockChartBinding.inflate(inflater, container, false)
         return binding.root
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.toolbar.title = "${stock.symbol} - ${stock.name}"
-        binding.toolbar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
+        binding.toolbar.setNavigationOnClickListener { parentFragmentManager.popBackStack() }
 
         binding.chartTypeToggle.check(R.id.btnLineChart)
         binding.periodToggle.check(R.id.btnMonth)
 
-        val currentPrice = parsePrice(stock.price)
-        val quantity = 10
-        val averagePrice = currentPrice * 0.95
-        val totalValue = currentPrice * quantity
-        val profit = (currentPrice - averagePrice) * quantity
-
-        binding.tvQuantity.text = "$quantity шт."
-        binding.tvCurrentPrice.text = String.format("%.2f ₽", currentPrice)
-        binding.tvAvgPrice.text = String.format("%.2f ₽", averagePrice)
-        binding.tvTotalValue.text = String.format("%.2f ₽", totalValue)
-        binding.tvProfit.text = String.format("%.2f ₽", profit)
-        binding.tvProfit.setTextColor(
-            if (profit >= 0)
-                ContextCompat.getColor(requireContext(), android.R.color.holo_green_dark)
-            else
-                ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark)
-        )
+        binding.btnBuy.setOnClickListener {
+            BuySellDialogFragment.newInstance(stock, "buy").show(parentFragmentManager, "BuyDialog")
+        }
+        binding.btnSell.setOnClickListener {
+            BuySellDialogFragment.newInstance(stock, "sell").show(parentFragmentManager, "SellDialog")
+        }
 
         binding.btnLineChart.setOnClickListener {
             currentChartType = ChartType.LINE
@@ -81,51 +68,51 @@ class StockChartFragment : Fragment() {
             updateChartData(currentChartType, currentTimePeriod)
         }
 
-        binding.btnWeek.setOnClickListener { 
-            currentTimePeriod = TimePeriod.WEEK
-            updateChartData(currentChartType, currentTimePeriod) 
-        }
-        binding.btnMonth.setOnClickListener { 
-            currentTimePeriod = TimePeriod.MONTH
-            updateChartData(currentChartType, currentTimePeriod) 
-        }
-        binding.btnHalfYear.setOnClickListener {
-            currentTimePeriod = TimePeriod.HALF_YEAR
-            updateChartData(currentChartType, currentTimePeriod)
-        }
-        binding.btnYear.setOnClickListener { 
-            currentTimePeriod = TimePeriod.YEAR
-            updateChartData(currentChartType, currentTimePeriod) 
-        }
-        binding.btnAllTime.setOnClickListener {
-            currentTimePeriod = TimePeriod.ALL_TIME
-            updateChartData(currentChartType, currentTimePeriod)
-        }
-
-        binding.btnBuy.setOnClickListener { /* TODO: Логика покупки */ }
-        binding.btnSell.setOnClickListener { /* TODO: Логика продажи */ }
+        binding.btnWeek.setOnClickListener { currentTimePeriod = TimePeriod.WEEK; updateChartData(currentChartType, currentTimePeriod) }
+        binding.btnMonth.setOnClickListener { currentTimePeriod = TimePeriod.MONTH; updateChartData(currentChartType, currentTimePeriod) }
+        binding.btnHalfYear.setOnClickListener { currentTimePeriod = TimePeriod.HALF_YEAR; updateChartData(currentChartType, currentTimePeriod) }
+        binding.btnYear.setOnClickListener { currentTimePeriod = TimePeriod.YEAR; updateChartData(currentChartType, currentTimePeriod) }
+        binding.btnAllTime.setOnClickListener { currentTimePeriod = TimePeriod.ALL_TIME; updateChartData(currentChartType, currentTimePeriod) }
 
         updateChartData(currentChartType, currentTimePeriod)
+
+        // UI обновляется только от состояния портфеля:
+        viewLifecycleOwner.lifecycleScope.launch {
+            sharedViewModel.positions.collect { renderHoldings() }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            sharedViewModel.balance.collect { /* если захотите показывать баланс на этом экране */ }
+        }
+
+        // Подтянуть портфель при открытии экрана акции
+        sharedViewModel.refreshPortfolio()
+        renderHoldings()
+    }
+
+    private fun renderHoldings() {
+        val currentPrice = parsePrice(stock.price)
+        val qty = sharedViewModel.getPosition(stock.symbol)
+
+        val averagePrice = currentPrice * 0.95
+        val totalValue = currentPrice * qty
+        val profit = (currentPrice - averagePrice) * qty
+
+        binding.tvQuantity.text = "$qty шт."
+        binding.tvCurrentPrice.text = String.format("%.2f ₽", currentPrice)
+        binding.tvAvgPrice.text = String.format("%.2f ₽", averagePrice)
+        binding.tvTotalValue.text = String.format("%.2f ₽", totalValue)
+        binding.tvProfit.text = String.format("%.2f ₽", profit)
+
+        binding.tvProfit.setTextColor(
+            if (profit >= 0) ContextCompat.getColor(requireContext(), android.R.color.holo_green_dark)
+            else ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark)
+        )
     }
 
     private fun updateChartData(type: ChartType, period: TimePeriod) {
         val data = generateChartData(parsePrice(stock.price), period)
-
-        if (type == ChartType.LINE) {
-            setupLineChart(data)
-        } else {
-            setupCandleChart(data)
-        }
-    }
-
-    private fun setupLineChart(data: List<PricePoint>) {
-        val lineChart = binding.lineChart as LineChartView
-        lineChart.setData(data)
-    }
-
-    private fun setupCandleChart(data: List<PricePoint>) {
-        val candleChart = binding.candleChart as CandleChartView
-        candleChart.setData(data)
+        if (type == ChartType.LINE) (binding.lineChart as LineChartView).setData(data)
+        else (binding.candleChart as CandleChartView).setData(data)
     }
 
     override fun onDestroyView() {
@@ -134,13 +121,15 @@ class StockChartFragment : Fragment() {
     }
 }
 
+
 fun parsePrice(priceString: String): Double {
-    return priceString
+    val s = priceString
         .replace("₽", "")
-        .replace(",", "")
-        .replace(" ", "")
         .trim()
-        .toDoubleOrNull() ?: 0.0
+        .replace("\u00A0", " ")
+        .replace(" ", "")
+        .replace(",", ".")
+    return s.toDoubleOrNull() ?: 0.0
 }
 
 enum class ChartType { LINE, CANDLE }
@@ -196,7 +185,4 @@ fun generateChartData(basePrice: Double, period: TimePeriod): List<PricePoint> {
     }
 
     return data
-
-
-
 }

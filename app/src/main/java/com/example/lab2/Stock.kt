@@ -1,10 +1,11 @@
 package com.example.lab2
-
 data class Stock(
     val symbol: String,
     val name: String,
     val price: String,
     val change: String,
-    val currentPrice: Double = price.replace("₽", "").replace(",", "").replace(" ", "").toDoubleOrNull() ?: 0.0,
     val quantity: Int = 10
-)
+) {
+    val currentPrice: Double
+        get() = parsePrice(price)
+}

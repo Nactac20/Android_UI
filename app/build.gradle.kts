@@ -51,5 +51,6 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.google.code.gson:gson:2.10.1")
-    // Compose test dependencies больше не нужны после перехода на XML
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+
 }

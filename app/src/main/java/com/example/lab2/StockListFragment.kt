@@ -8,7 +8,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lab2.databinding.FragmentStockListBinding
@@ -16,6 +18,7 @@ import com.example.lab2.data.StockQuote
 import com.example.lab2.data.StockRepository
 import java.util.Locale
 import kotlinx.coroutines.launch
+
 
 class StockListFragment : Fragment() {
 
@@ -57,23 +60,32 @@ class StockListFragment : Fragment() {
         }
         binding.stockRecyclerView.adapter = adapter
 
+        binding.stockRecyclerView.isEnabled = false
+
         viewLifecycleOwner.lifecycleScope.launch {
-            val result = runCatching { stockRepository.fetchQuotes(symbols) }
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                val result = runCatching { stockRepository.fetchQuotes(symbols) }
 
-            val quotes = result.getOrElse {
-                context?.let { ctx ->
-                    Toast.makeText(ctx, "Ошибка загрузки курсов", Toast.LENGTH_SHORT).show()
+                val quotes = result.getOrElse { throwable ->
+                    context?.let { ctx ->
+                        Toast.makeText(ctx, "Ошибка загрузки курсов: ${throwable.message}", Toast.LENGTH_SHORT).show()
+                    }
+                    emptyList()
                 }
-                emptyList()
-            }
 
-            if (!isAdded) return@launch
+                val newStocks = quotes.map { it.toStock() }
 
-            val newStocks = quotes.map { it.toStock() }
-            if (newStocks.isEmpty() && result.isSuccess) {
-                Toast.makeText(requireContext(), "Курсы не найдены", Toast.LENGTH_SHORT).show()
+                val b = _binding ?: return@repeatOnLifecycle
+
+                adapter.updateItems(newStocks)
+                b.stockRecyclerView.isEnabled = true
+
+                if (newStocks.isEmpty() && result.isSuccess && isAdded) {
+                    context?.let { ctx ->
+                        Toast.makeText(ctx, "Акции не найдены", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
-            adapter.updateItems(newStocks)
         }
     }
 

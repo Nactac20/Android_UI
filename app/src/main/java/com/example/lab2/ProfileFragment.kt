@@ -6,11 +6,14 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.lab2.data.StockRepository
+import com.example.lab2.api.ApiClient
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import java.util.Locale
+import com.example.lab2.api.toPositionsMap
+
 import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
@@ -26,7 +29,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         "MGNT"
     )
 
+
     private val stockRepository = StockRepository()
+
+    private var isRefreshing = false
+
+    private val sharedViewModel: SharedStatsViewModel by activityViewModels()
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -40,76 +48,70 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val tvStockCount = view.findViewById<TextView>(R.id.tvStockCount)
         val tvRegDate = view.findViewById<TextView>(R.id.tvRegDate)
         val switchDarkTheme = view.findViewById<SwitchMaterial>(R.id.switchDarkTheme)
+        val btnRefreshStats = view.findViewById<Button>(R.id.btnRefreshStats)
 
         switchDarkTheme.isChecked = ThemePrefs.isDarkEnabled(requireContext())
         switchDarkTheme.setOnCheckedChangeListener { _, isChecked ->
             ThemePrefs.setDarkEnabled(requireContext(), isChecked)
         }
-        val btnRefreshStats = view.findViewById<Button>(R.id.btnRefreshStats)
 
         tvUserName.text = username
         tvUserEmail.text = "$username@example.com".lowercase()
-        tvBalance.text = "10 000 ₽"
-        tvStockCount.text = "5"
         tvRegDate.text = "01.01.2024"
 
-
         btnRefreshStats.setOnClickListener {
-            refreshStatistics(tvBalance, tvStockCount)
-            updateBottomNavQuotes()
+            sharedViewModel.refreshPortfolio()
         }
 
-        // Обновляем label в bottom nav при открытии профиля.
+        if (savedInstanceState == null) {
+            sharedViewModel.refreshPortfolio()
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            sharedViewModel.balance.collect { balance ->
+                tvBalance.text = "%.0f ₽".format(balance)
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            sharedViewModel.stockCount.collect { count ->
+                tvStockCount.text = count.toString()
+            }
+        }
+
         updateBottomNavQuotes()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-    }
+    private fun refreshStatisticsFromNetwork() {
+        if (isRefreshing) return
+        isRefreshing = true
 
-    private fun refreshStatistics(tvBalance: TextView, tvStockCount: TextView) {
-        val newBalance = (-5000..50000).random()
-        val newCount = (1..20).random()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val portfolio = ApiClient.api.portfolio()
+                val positionsMap = portfolio.toPositionsMap()
 
-        tvBalance.text = "$newBalance ₽"
-        tvStockCount.text = newCount.toString()
-
-        Toast.makeText(requireContext(), "Статистика обновлена", Toast.LENGTH_SHORT).show()
+                sharedViewModel.updatePortfolio(
+                    newBalance = portfolio.balance ?: 0.0,
+                    newStockCount = portfolio.stocksCount ?: 0,
+                    newPositions = positionsMap,
+                )
+            } catch (e: Exception) {
+                context?.let { Toast.makeText(it, "Ошибка загрузки статистики: ${e.message}", Toast.LENGTH_SHORT).show() }
+            } finally {
+                isRefreshing = false
+            }
+        }
     }
 
     private fun updateBottomNavQuotes() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val quotes = runCatching { stockRepository.fetchQuotes(symbols) }
-                .getOrElse { throwable ->
-                    // requireContext() может упасть, если фрагмент уже отсоединен при пересоздании по смене темы.
-                    context?.let {
-                        Toast.makeText(it, "Ошибка загрузки курсов", Toast.LENGTH_SHORT).show()
-                    }
-                    emptyList()
-                }
-
-            val top = quotes.maxByOrNull { it.changePct }
-            if (top == null) return@launch
-
-            // requireActivity() может упасть, если фрагмент уже не attached.
+            runCatching { stockRepository.fetchQuotes(symbols) }.getOrNull() ?: return@launch
             val bottomNav: BottomNavigationView =
                 activity?.findViewById(R.id.bottomNavigation) ?: return@launch
 
-            val titleProfile = "Профиль"
-            val titleMyStat = "Статистика"
-            val titleStockList = "Акции"
-
-            bottomNav.menu.findItem(R.id.nav_profile)?.title = titleProfile
-            bottomNav.menu.findItem(R.id.nav_statistics)?.title = titleMyStat
-            bottomNav.menu.findItem(R.id.nav_stock_list)?.title = titleStockList
+            bottomNav.menu.findItem(R.id.nav_profile)?.title = "Профиль"
+            bottomNav.menu.findItem(R.id.nav_statistics)?.title = "Статистика"
+            bottomNav.menu.findItem(R.id.nav_stock_list)?.title = "Акции"
         }
-    }
-
-    private fun formatRub(value: Double): String {
-        return String.format(Locale.US, "%.2f ₽", value)
-    }
-
-    private fun formatPct(value: Double): String {
-        return String.format(Locale.US, "%+.2f%%", value)
     }
 }

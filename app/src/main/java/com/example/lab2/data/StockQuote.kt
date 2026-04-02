@@ -9,5 +9,7 @@ data class StockQuote(
     val price: Double,
     val changeAbs: Double,
     val changePct: Double
+
+
 )
 

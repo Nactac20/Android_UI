@@ -1,0 +1,22 @@
+{
+  "success": true,
+  "message": "Покупка успешно выполнена",
+  "transaction": {
+    "id": "TXN_001",
+    "symbol": "SBER",
+    "quantity": 1,
+    "price": 250.50,
+    "timestamp": "2024-04-01T12:00:00Z"
+  },
+  "portfolio": {
+    "balance": 9749.50,
+    "stocksCount": 6,
+    "totalValue": 12500.00,
+    "positions": [
+      {"symbol": "SBER", "quantity": 3},
+      {"symbol": "GAZP", "quantity": 1},
+      {"symbol": "LKOH", "quantity": 1},
+      {"symbol": "YNDX", "quantity": 1}
+    ]
+  }
+}

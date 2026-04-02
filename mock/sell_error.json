@@ -1,0 +1,22 @@
+{
+  "success": false,
+  "message": "Продажа не выполнена: недостаточно акций для продажи",
+  "transaction": {
+    "id": "TXN_003",
+    "symbol": "SBER",
+    "quantity": 10,
+    "price": 255.00,
+    "timestamp": "2024-04-01T12:10:00Z"
+  },
+  "portfolio": {
+    "balance": 10000.00,
+    "stocksCount": 5,
+    "totalValue": 12450.00,
+    "positions": [
+      {"symbol": "SBER", "quantity": 2},
+      {"symbol": "GAZP", "quantity": 1},
+      {"symbol": "LKOH", "quantity": 1},
+      {"symbol": "YNDX", "quantity": 1}
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "error": {
+    "code": "INSUFFICIENT_FUNDS",
+    "message": "Недостаточно средств на балансе"
+  }
+}
