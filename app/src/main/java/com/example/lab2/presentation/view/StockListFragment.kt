@@ -1,4 +1,4 @@
-package com.example.lab2
+package com.example.lab2.presentation.view
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,14 +13,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.lab2.R
+import com.example.lab2.data.repositoryimpl.QuotesRepositoryImpl
 import com.example.lab2.databinding.FragmentStockListBinding
-import com.example.lab2.data.StockQuote
-import com.example.lab2.data.StockRepository
-import java.util.Locale
+import com.example.lab2.domain.entity.Stock
+import com.example.lab2.presentation.contract.StockListContract
+import com.example.lab2.presentation.presenter.StockListPresenterImpl
 import kotlinx.coroutines.launch
 
-
-class StockListFragment : Fragment() {
+class StockListFragment : Fragment(), StockListContract.View {
 
     private var _binding: FragmentStockListBinding? = null
     private val binding get() = _binding!!
@@ -36,7 +37,8 @@ class StockListFragment : Fragment() {
         "MGNT"
     )
 
-    private val stockRepository = StockRepository()
+    private lateinit var presenter: StockListContract.Presenter
+    private lateinit var adapter: StockAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,59 +52,64 @@ class StockListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.stockRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        presenter = StockListPresenterImpl(QuotesRepositoryImpl(), symbols)
 
-        val adapter = StockAdapter(emptyList()) { stock ->
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragmentContainer, StockChartFragment.newInstance(stock))
-                .addToBackStack(null)
-                .commit()
+        binding.stockRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        adapter = StockAdapter(emptyList()) { stock ->
+            presenter.onStockClicked(stock)
         }
         binding.stockRecyclerView.adapter = adapter
-
         binding.stockRecyclerView.isEnabled = false
+    }
 
+    override fun onStart() {
+        super.onStart()
+        presenter.attach(this, viewLifecycleOwner.lifecycleScope)
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                val result = runCatching { stockRepository.fetchQuotes(symbols) }
-
-                val quotes = result.getOrElse { throwable ->
-                    context?.let { ctx ->
-                        Toast.makeText(ctx, "Ошибка загрузки курсов: ${throwable.message}", Toast.LENGTH_SHORT).show()
-                    }
-                    emptyList()
-                }
-
-                val newStocks = quotes.map { it.toStock() }
-
-                val b = _binding ?: return@repeatOnLifecycle
-
-                adapter.updateItems(newStocks)
-                b.stockRecyclerView.isEnabled = true
-
-                if (newStocks.isEmpty() && result.isSuccess && isAdded) {
-                    context?.let { ctx ->
-                        Toast.makeText(ctx, "Акции не найдены", Toast.LENGTH_SHORT).show()
-                    }
-                }
+                presenter.loadQuotes()
             }
         }
+    }
+
+    override fun onStop() {
+        presenter.detach()
+        super.onStop()
+    }
+
+    override fun renderLoading() {
+        val b = _binding ?: return
+        b.stockRecyclerView.isEnabled = false
+    }
+
+    override fun renderStockList(stocks: List<Stock>) {
+        adapter.updateItems(stocks)
+    }
+
+    override fun showError(message: String) {
+        context?.let { Toast.makeText(it, message, Toast.LENGTH_SHORT).show() }
+    }
+
+    override fun setListInteractionEnabled(enabled: Boolean) {
+        val b = _binding ?: return
+        b.stockRecyclerView.isEnabled = enabled
+    }
+
+    override fun showEmptyMessage() {
+        if (!isAdded) return
+        context?.let { Toast.makeText(it, "Акции не найдены", Toast.LENGTH_SHORT).show() }
+    }
+
+    override fun navigateToStockChart(stock: Stock) {
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, StockChartFragment.newInstance(stock))
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun StockQuote.toStock(): Stock {
-        val priceText = String.format(Locale.US, "%.2f ₽", price)
-        val changeText = String.format(Locale.US, "%+.2f ₽ (%+.2f%%)", changeAbs, changePct)
-        return Stock(
-            symbol = symbol,
-            name = name,
-            price = priceText,
-            change = changeText
-        )
     }
 
     private class StockAdapter(

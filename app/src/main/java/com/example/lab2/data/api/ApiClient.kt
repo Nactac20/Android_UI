@@ -1,4 +1,4 @@
-package com.example.lab2.api
+package com.example.lab2.data.api
 
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
@@ -33,6 +33,4 @@ object ApiClient {
             .build()
             .create(StockApi::class.java)
     }
-
-
 }

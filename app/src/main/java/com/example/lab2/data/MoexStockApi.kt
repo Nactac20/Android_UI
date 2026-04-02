@@ -1,5 +1,6 @@
 package com.example.lab2.data
 
+import com.example.lab2.domain.entity.StockQuote
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
@@ -41,7 +42,6 @@ class MoexStockApi(
             val response = service.getQuote(symbol)
             parseResponse(response, symbol)
         } catch (e: Exception) {
-            // тут можно сделать нормальную ошибку
             throw e
         }
     }

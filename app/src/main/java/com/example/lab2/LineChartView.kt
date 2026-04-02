@@ -1,5 +1,6 @@
 package com.example.lab2
 
+import com.example.lab2.presentation.chart.PricePoint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet

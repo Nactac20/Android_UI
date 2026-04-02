@@ -2,13 +2,15 @@ package com.example.lab2
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.lab2.api.ApiClient
-import com.example.lab2.api.toPositionsMap
+import com.example.lab2.data.repositoryimpl.PortfolioRepositoryImpl
+import com.example.lab2.domain.repository.PortfolioRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class SharedStatsViewModel : ViewModel() {
+class SharedStatsViewModel(
+    private val portfolioRepository: PortfolioRepository = PortfolioRepositoryImpl()
+) : ViewModel() {
 
     private val _balance = MutableStateFlow(10000.0)
     val balance: StateFlow<Double> = _balance
@@ -32,13 +34,13 @@ class SharedStatsViewModel : ViewModel() {
 
     fun refreshPortfolio() {
         viewModelScope.launch {
-            runCatching { ApiClient.api.portfolio() }
+            runCatching { portfolioRepository.getPortfolio() }
                 .onSuccess { p ->
                     _lastError.value = null
                     updatePortfolio(
-                        newBalance = p.balance ?: _balance.value,
-                        newStockCount = p.stocksCount ?: _stockCount.value,
-                        newPositions = p.toPositionsMap()
+                        newBalance = p.balance,
+                        newStockCount = p.stocksCount,
+                        newPositions = p.positions
                     )
                 }
                 .onFailure { e ->

@@ -1,4 +1,7 @@
-package com.example.lab2
+package com.example.lab2.domain.entity
+
+import com.example.lab2.domain.util.parsePrice
+
 data class Stock(
     val symbol: String,
     val name: String,

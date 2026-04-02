@@ -1,4 +1,4 @@
-package com.example.lab2.api
+package com.example.lab2.data.api
 
 import retrofit2.http.Body
 import retrofit2.http.GET
