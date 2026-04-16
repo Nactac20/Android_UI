@@ -25,12 +25,14 @@ object ApiClient {
             .build()
     }
 
-    val api: StockApi by lazy {
+    private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttp)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(StockApi::class.java)
     }
+
+    val api: StockApi by lazy { retrofit.create(StockApi::class.java) }
+    val sduiApi: SduiApi by lazy { retrofit.create(SduiApi::class.java) }
 }

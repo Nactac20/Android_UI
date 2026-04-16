@@ -63,7 +63,7 @@ class SecondActivity : AppCompatActivity(), SecondContract.View {
 
     override fun navigateToStatistics() {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, StatisticsFragment())
+            .replace(R.id.fragmentContainer, SduiFragment())
             .commit()
     }
 
