@@ -3,132 +3,130 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:background="@color/surface_background">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="@dimen/space_l"
         android:gravity="center_horizontal">
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="50dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="?attr/colorSurface">
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_marginTop="@dimen/space_m"
+            app:cardBackgroundColor="@color/surface_muted"
+            app:cardCornerRadius="48dp"
+            app:cardElevation="0dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:text="🎰"
-                android:textSize="48sp" />
-        </androidx.cardview.widget.CardView>
+                android:text="@string/profile_avatar_initials"
+                android:textSize="50sp"
+                android:textAppearance="@style/TextAppearance.StockExchange.Title"
+                android:textColor="?attr/colorPrimary" />
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/tvUserName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Иван Петров"
-            android:textSize="22sp"
-            android:textStyle="bold"
+            android:layout_marginTop="@dimen/space_m"
+            android:text="@string/profile_name_placeholder"
+            android:textAppearance="@style/TextAppearance.StockExchange.Headline"
             android:gravity="center"
             android:maxLines="1"
-            android:ellipsize="end"
-            android:textColor="?attr/colorOnSurface" />
+            android:ellipsize="end" />
 
         <TextView
             android:id="@+id/tvUserEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="ivan@example.com"
-            android:textSize="14sp"
+            android:layout_marginTop="@dimen/space_xs"
+            android:text="@string/profile_email_placeholder"
+            android:textAppearance="@style/TextAppearance.StockExchange.Caption"
             android:gravity="center"
             android:maxLines="1"
-            android:ellipsize="end"
-            android:textColor="?attr/colorOnSurface" />
+            android:ellipsize="end" />
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.StockExchange.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp">
+            android:layout_marginTop="@dimen/space_xl"
+            app:strokeColor="@color/divider"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="@dimen/space_xl">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Финансовая информация"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="16dp" />
+                    android:text="@string/profile_finance_title"
+                    android:textAppearance="@style/TextAppearance.StockExchange.Title"
+                    android:layout_marginBottom="@dimen/space_l" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="@dimen/space_m">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Баланс:"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:text="@string/profile_balance_label"
+                        android:textAppearance="@style/TextAppearance.StockExchange.Body" />
 
                     <TextView
                         android:id="@+id/tvBalance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="10 000 ₽"
-                        android:textStyle="bold"
-                        android:textColor="#4CAF50" />
+                        android:text="@string/profile_balance_placeholder"
+                        android:textAppearance="@style/TextAppearance.StockExchange.Title"
+                        android:textColor="@color/success" />
                 </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="?attr/colorOnSurface"
-                    android:layout_marginBottom="12dp" />
+                    android:background="@color/divider"
+                    android:layout_marginBottom="@dimen/space_m" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="@dimen/space_m">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Акций в портфеле:"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:text="@string/profile_stock_count_label"
+                        android:textAppearance="@style/TextAppearance.StockExchange.Body" />
 
                     <TextView
                         android:id="@+id/tvStockCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="5"
-                        android:textStyle="bold"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:text="@string/profile_stock_count_placeholder"
+                        android:textAppearance="@style/TextAppearance.StockExchange.Title" />
                 </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="?attr/colorOnSurface"
-                    android:layout_marginBottom="12dp" />
+                    android:background="@color/divider"
+                    android:layout_marginBottom="@dimen/space_m" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -139,54 +137,52 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Дата регистрации:"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:text="@string/profile_reg_date_label"
+                        android:textAppearance="@style/TextAppearance.StockExchange.Body" />
 
                     <TextView
                         android:id="@+id/tvRegDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="01.01.2024"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:text="@string/profile_reg_date_placeholder"
+                        android:textAppearance="@style/TextAppearance.StockExchange.Caption" />
                 </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.StockExchange.Card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp">
+            android:layout_marginTop="@dimen/space_l"
+            app:strokeColor="@color/divider"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="@dimen/space_xl">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Настройки"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="16dp" />
+                    android:text="@string/profile_settings_title"
+                    android:textAppearance="@style/TextAppearance.StockExchange.Title"
+                    android:layout_marginBottom="@dimen/space_m" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:gravity="center_vertical">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Тёмная тема"
-                        android:textColor="?attr/colorOnSurface" />
+                        android:text="@string/profile_dark_theme"
+                        android:textAppearance="@style/TextAppearance.StockExchange.Body" />
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switchDarkTheme"
@@ -196,16 +192,16 @@
                         android:enabled="true" />
                 </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRefreshStats"
+            style="@style/Widget.StockExchange.Button.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:text="Обновить статистику"
-            android:backgroundTint="?attr/colorPrimary" />
+            android:layout_marginTop="@dimen/space_l"
+            android:layout_marginBottom="@dimen/space_l"
+            android:text="@string/profile_refresh_stats" />
 
     </LinearLayout>
 </ScrollView>

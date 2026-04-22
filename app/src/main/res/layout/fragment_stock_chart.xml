@@ -274,18 +274,18 @@
         android:id="@+id/btnSell"
         android:layout_width="0dp"
         android:layout_height="43dp"
+        android:backgroundTint="?attr/colorSurface"
         android:text="Продать"
         android:textColor="?attr/colorPrimary"
         android:textSize="14sp"
         android:textStyle="bold"
-        android:backgroundTint="?attr/colorSurface"
         app:cornerRadius="28dp"
-        app:strokeColor="?attr/colorPrimary"
-        app:strokeWidth="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btnBuy"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="35" />
+        app:layout_constraintHorizontal_weight="35"
+        app:layout_constraintStart_toEndOf="@id/btnBuy"
+        app:strokeColor="?attr/colorPrimary"
+        app:strokeWidth="2dp" />
 
     <View
         android:id="@+id/leftSpacer"

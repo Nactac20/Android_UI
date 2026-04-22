@@ -4,17 +4,17 @@
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/baseline_person_24"
-        android:title="Профиль" />
+        android:title="@string/nav_profile" />
 
     <item
         android:id="@+id/nav_stock_list"
         android:icon="@drawable/outline_area_chart_24"
-        android:title="Акции" />
+        android:title="@string/nav_stocks" />
 
     <item
         android:id="@+id/nav_statistics"
         android:icon="@drawable/baseline_bar_chart_24"
-        android:title="Статистика" />
+        android:title="@string/nav_statistics" />
 
 </menu>
 

@@ -4,24 +4,23 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:padding="@dimen/space_xl"
     android:background="?attr/colorSurface">
 
     <TextView
         android:id="@+id/tvDialogTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Купить акцию"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:text="@string/dialog_buy_title"
+        android:textAppearance="@style/TextAppearance.StockExchange.Headline"
         android:gravity="center"
-        android:layout_marginBottom="20dp"
-        android:textColor="?attr/colorOnSurface" />
+        android:layout_marginBottom="@dimen/space_l" />
 
     <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.StockExchange.TextInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Количество акций"
+        android:hint="@string/dialog_quantity_hint"
         app:boxBackgroundMode="outline">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -38,35 +37,33 @@
         android:id="@+id/tvTotalAmount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/space_l"
         android:gravity="center"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="?attr/colorPrimary"
+        android:textAppearance="@style/TextAppearance.StockExchange.Title"
+        android:textColor="@color/success"
         android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="@dimen/space_xl"
         android:gravity="end">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCancel"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="@style/Widget.StockExchange.Button.Outlined"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Отмена"
-            android:textColor="?attr/colorOnSurface" />
+            android:text="@string/dialog_cancel" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnConfirm"
+            style="@style/Widget.StockExchange.Button.Primary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:text="Купить"
-            android:enabled="false"
-            android:backgroundTint="?attr/colorPrimary" />
+            android:layout_marginStart="@dimen/space_m"
+            android:text="@string/dialog_buy"
+            android:enabled="false" />
     </LinearLayout>
 </LinearLayout>

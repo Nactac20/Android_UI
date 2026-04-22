@@ -1,3 +1,33 @@
 <resources>
     <string name="app_name">StockExchange</string>
+
+    <string name="auth_title">Регистрация</string>
+    <string name="auth_login_hint">Логин</string>
+    <string name="auth_password_hint">Пароль</string>
+    <string name="auth_open_profile">Перейти в профиль</string>
+
+    <string name="stock_list_title">Список акций</string>
+
+    <string name="dialog_buy_title">Купить акцию</string>
+    <string name="dialog_quantity_hint">Количество акций</string>
+    <string name="dialog_cancel">Отмена</string>
+    <string name="dialog_buy">Купить</string>
+
+    <string name="profile_avatar_initials">🎰</string>
+    <string name="profile_name_placeholder">Иван Петров</string>
+    <string name="profile_email_placeholder">ivan@example.com</string>
+    <string name="profile_finance_title">Финансовая информация</string>
+    <string name="profile_balance_label">Баланс</string>
+    <string name="profile_balance_placeholder">10 000 ₽</string>
+    <string name="profile_stock_count_label">Акций в портфеле</string>
+    <string name="profile_stock_count_placeholder">5</string>
+    <string name="profile_reg_date_label">Дата регистрации</string>
+    <string name="profile_reg_date_placeholder">01.01.2024</string>
+    <string name="profile_settings_title">Настройки</string>
+    <string name="profile_dark_theme">Тёмная тема</string>
+    <string name="profile_refresh_stats">Обновить статистику</string>
+
+    <string name="nav_profile">Профиль</string>
+    <string name="nav_stocks">Акции</string>
+    <string name="nav_statistics">Статистика</string>
 </resources>
