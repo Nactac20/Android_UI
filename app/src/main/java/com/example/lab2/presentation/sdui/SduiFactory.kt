@@ -99,11 +99,11 @@ object SduiFactory {
         }
 
     private fun bindStatRow(view: View, component: SduiComponentDto) {
-        val labelView = view.findViewById<TextView>(android.R.id.text1)
-        val valueView = view.findViewById<TextView>(android.R.id.text2)
+        val row = view as LinearLayout
+        val labelView = row.getChildAt(0) as TextView
+        val valueView = row.getChildAt(1) as TextView
         labelView.text = component.label.orEmpty()
-        val value = component.payload?.get("value")?.toString().orEmpty()
-        valueView.text = value
+        valueView.text = component.payload?.get("value")?.toString().orEmpty()
     }
 
     private fun createUnknown(ctx: Context): MaterialTextView =

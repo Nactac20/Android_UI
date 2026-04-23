@@ -1,23 +1,27 @@
 package com.example.lab2.presentation.view
 
 import android.os.Bundle
+import android.view.View
+import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.lab2.R
 import com.example.lab2.ThemePrefs
+import com.example.lab2.data.sdui.SduiComponentDto
+import com.example.lab2.data.sdui.SduiRepositoryImpl
 import com.example.lab2.databinding.ActivitySecondBinding
-import com.example.lab2.presentation.contract.SecondContract
-import com.example.lab2.presentation.presenter.SecondPresenterImpl
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.example.lab2.presentation.contract.SduiContract
+import com.example.lab2.presentation.presenter.SduiPresenterImpl
+import com.example.lab2.presentation.sdui.SduiAdapter
 
-class SecondActivity : AppCompatActivity(), SecondContract.View {
+class SecondActivity : AppCompatActivity(), SduiContract.View {
 
     private lateinit var binding: ActivitySecondBinding
-    private lateinit var presenter: SecondContract.Presenter
-
-    private companion object {
-        const val KEY_SELECTED_NAV = "selected_nav"
-        const val KEY_USERNAME = "username"
-    }
+    private lateinit var presenter: SduiContract.Presenter
+    private lateinit var adapter: SduiAdapter
+    private var progress: ProgressBar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,21 +30,20 @@ class SecondActivity : AppCompatActivity(), SecondContract.View {
         binding = ActivitySecondBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val username = savedInstanceState?.getString(KEY_USERNAME) ?: intent.getStringExtra("username")
+        presenter = SduiPresenterImpl(SduiRepositoryImpl())
+        presenter.attach(this, lifecycleScope)
 
-        presenter = SecondPresenterImpl(username)
-        presenter.attach(this)
+        progress = findViewById(R.id.sduiProgress)
 
-        setupBottomNavigation(binding.bottomNavigation)
+        adapter = SduiAdapter(
+            onImpression = { presenter.onComponentImpression(it) },
+            onClick = { presenter.onComponentClicked(it) }
+        )
 
-        binding.bottomNavigation.selectedItemId =
-            savedInstanceState?.getInt(KEY_SELECTED_NAV, R.id.nav_profile) ?: R.id.nav_profile
-    }
+        binding.sduiRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.sduiRecyclerView.adapter = adapter
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putInt(KEY_SELECTED_NAV, binding.bottomNavigation.selectedItemId)
-        outState.putString(KEY_USERNAME, (intent.getStringExtra("username") ?: ""))
+        presenter.loadSecondScreen()
     }
 
     override fun onDestroy() {
@@ -48,35 +51,19 @@ class SecondActivity : AppCompatActivity(), SecondContract.View {
         super.onDestroy()
     }
 
-    override fun navigateToProfile(username: String?) {
-        val fragment = ProfileFragment().apply {
-            arguments = Bundle().apply {
-                if (!username.isNullOrEmpty()) {
-                    putString("username", username)
-                }
-            }
-        }
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, fragment)
-            .commit()
+    override fun renderLoading(visible: Boolean) {
+        progress?.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
-    override fun navigateToStatistics() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, SduiFragment())
-            .commit()
+    override fun renderComponents(components: List<SduiComponentDto>) {
+        adapter.submit(components)
     }
 
-    override fun navigateToStockList() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, StockListFragment())
-            .commit()
+    override fun showError(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun setupBottomNavigation(bottomNav: BottomNavigationView) {
-        bottomNav.setOnItemSelectedListener { item ->
-            presenter.onNavItemSelected(item.itemId)
-            true
-        }
+    override fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

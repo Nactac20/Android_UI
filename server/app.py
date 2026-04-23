@@ -1,7 +1,9 @@
 from fastapi import FastAPI
+from fastapi.responses import Response
 from pydantic import BaseModel
-from typing import Dict, Any, Optional, List
+from typing import Dict
 import time
+import json
 
 app = FastAPI()
 
@@ -28,9 +30,9 @@ class AnalyticsEvent(BaseModel):
     timestamp: int
 
 
-@app.get("/ui/second", response_model=SecondScreenConfig)
+@app.get("/ui/second")
 def get_second_ui():
-    return SecondScreenConfig(
+    config = SecondScreenConfig(
         components=[
             UIComponent(id="title", type="title", label="SDUI: Second screen"),
             UIComponent(id="subtitle", type="text", label="Config is delivered from server as JSON."),
@@ -49,6 +51,8 @@ def get_second_ui():
             ),
         ]
     )
+    payload = json.dumps(config.model_dump(), ensure_ascii=False, indent=2)
+    return Response(content=payload, media_type="application/json")
 
 
 @app.post("/analytics/events")
